@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>Test</title>
+    <title>defer加载测试</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
@@ -49,6 +49,7 @@
         if (isScript) {
             node.type = 'text/javascript';
             node.src = url;
+            node.defer = 'defer';
         } else {
             if (isCss) {
                 node.type = 'text/css';
@@ -149,13 +150,15 @@
           load(getUrl(js), 'js', check);
         }
       }
-      test1(function(){
-        test2(function(){
-          test3(function(){
-            test4()
+      setTimeout(function(){
+        test1(function(){
+          test2(function(){
+            test3(function(){
+              test4()
+            });
           });
         });
-      });
+      }, 1000);
     </script>
   </body>
 </html>
