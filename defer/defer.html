@@ -10,8 +10,18 @@
     <script>
       var css = 'defer.css';
       var js = 'defer.js';
+      var size = 100;
       var index = Date.now();
       var head = document.head || document.getElementsByTagName('head')[0];
+      var result = document.getElementById('result');
+      function log(msg){
+        var li = document.createElement('li');
+        li.innerText = msg;
+        result.appendChild(li);
+      }
+      function getUrl(path){
+        return path + '?t=' + (index++);
+      }
       function load(url, type, callback) {
         var isScript = type === 'js';
         var isCss = type === 'css';
@@ -64,6 +74,85 @@
             }
         }
       }
+      function test1(done){
+        var title = '先加载css后加载js';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') done();
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(css), 'css', check);
+        }
+        for(var i = 0; i < size; i++){
+          load(getUrl(js), 'js', check);
+        }
+      }
+      function test2(done){
+        var title = '先加载js后加载css';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') done();
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(js), 'js', check);
+        }
+        for(var i = 0; i < size; i++){
+          load(getUrl(css), 'css', check);
+        }
+      }
+      function test3(done){
+        var title = '先加载js，css交替加载';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') done();
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(js), 'js', check);
+          load(getUrl(css), 'css', check);
+        }
+      }
+      function test4(done){
+        var title = '先加载css，js交替加载';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') done();
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(css), 'css', check);
+          load(getUrl(js), 'js', check);
+        }
+      }
+      test1(function(){
+        test2(function(){
+          test3(function(){
+            test4()
+          });
+        });
+      });
     </script>
   </body>
 </html>
