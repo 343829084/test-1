@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <ul id="result"></ul>
+    <script>
+      var css = 'defer.css';
+      var js = 'defer.js';
+      var index = Date.now();
+      var head = document.head || document.getElementsByTagName('head')[0];
+      function load(url, type, callback) {
+        var isScript = type === 'js';
+        var isCss = type === 'css';
+        var node = document.createElement(isScript ? 'script' : 'link');
+        var supportOnload = 'onload' in node;
+        var done = function(err){
+            clearTimeout(tid);
+            clearInterval(intId);
+            if(node){
+                node.onload = node.onreadystatechange = noop;
+                if (isScript && head && node.parentNode) {
+                    head.removeChild(node);
+                }
+                node = null;
+            }
+            callback(err);
+        };
+        var tid = setTimeout(function () {
+            done('timeout');
+        }, TIMEOUT);
+        var intId;
+        if (isScript) {
+            node.type = 'text/javascript';
+            node.src = url;
+        } else {
+            if (isCss) {
+                node.type = 'text/css';
+                node.rel = 'stylesheet';
+            }
+            node.href = url;
+        }
+        node.onload = node.onreadystatechange = function () {
+            if (node && (!node.readyState || /loaded|complete/.test(node.readyState))) {
+                done();
+            }
+        };
+        node.onerror = function (e) {
+            e = (e || {}).error || new Error('load resource timeout');
+            e.message = 'Error loading [' + url + ']: ' + e.message;
+            done(e);
+        };
+        head.appendChild(node);
+        if (isCss) {
+            if (isOldWebKit || !supportOnload) {
+                intId = setInterval(function () {
+                    if (node.sheet) {
+                        done();
+                    }
+                }, 20);
+            }
+        }
+      }
+    </script>
+  </body>
+</html>
