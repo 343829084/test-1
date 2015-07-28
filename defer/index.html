@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>正常加载测试</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <ul id="result"></ul>
+    <script>
+      var TIMEOUT = 2000;
+      var css = 'defer.css';
+      var js = 'defer.js';
+      var size = 20;
+      var index = Date.now();
+      var head = document.head || document.getElementsByTagName('head')[0];
+      var result = document.getElementById('result');
+      var isOldWebKit = +navigator.userAgent.replace(/.*AppleWebKit\/(\d+)\..*/, '$1') < 536;
+      function noop(){}
+      function log(msg){
+        var li = document.createElement('li');
+        li.innerText = msg;
+        result.appendChild(li);
+      }
+      function getUrl(path){
+        return path + '?t=' + (index++);
+      }
+      function load(url, type, callback) {
+        var isScript = type === 'js';
+        var isCss = type === 'css';
+        var node = document.createElement(isScript ? 'script' : 'link');
+        var supportOnload = 'onload' in node;
+        var done = function(err){
+            clearTimeout(tid);
+            clearInterval(intId);
+            if(node){
+                node.onload = node.onreadystatechange = noop;
+                if (isScript && head && node.parentNode) {
+                    head.removeChild(node);
+                }
+                node = null;
+            }
+            callback(err);
+        };
+        var tid = setTimeout(function () {
+            done('timeout');
+        }, TIMEOUT);
+        var intId;
+        if (isScript) {
+            node.type = 'text/javascript';
+            node.src = url;
+        } else {
+            if (isCss) {
+                node.type = 'text/css';
+                node.rel = 'stylesheet';
+            }
+            node.href = url;
+        }
+        node.onload = node.onreadystatechange = function () {
+            if (node && (!node.readyState || /loaded|complete/.test(node.readyState))) {
+                done();
+            }
+        };
+        node.onerror = function (e) {
+            e = (e || {}).error || new Error('load resource timeout');
+            e.message = 'Error loading [' + url + ']: ' + e.message;
+            done(e);
+        };
+        head.appendChild(node);
+        if (isCss) {
+            if (isOldWebKit || !supportOnload) {
+                intId = setInterval(function () {
+                    if (node.sheet) {
+                        done();
+                    }
+                }, 20);
+            }
+        }
+      }
+      function test1(done){
+        var title = '先加载css后加载js';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') setTimeout(done, 2000);
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(css), 'css', check);
+        }
+        for(var i = 0; i < size; i++){
+          load(getUrl(js), 'js', check);
+        }
+      }
+      function test2(done){
+        var title = '先加载js后加载css';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') setTimeout(done, 2000);
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(js), 'js', check);
+        }
+        for(var i = 0; i < size; i++){
+          load(getUrl(css), 'css', check);
+        }
+      }
+      function test3(done){
+        var title = '先加载js，css交替加载';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') setTimeout(done, 2000);
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(js), 'js', check);
+          load(getUrl(css), 'css', check);
+        }
+      }
+      function test4(done){
+        var title = '先加载css，js交替加载';
+        var total = size * 2;
+        var count = 0;
+        var check = function(){
+          count++;
+          if(count === size) {
+            log(title + '耗时：' + (Date.now() - start));
+            if(typeof done === 'function') setTimeout(done, 2000);
+          }
+        };
+        var start = Date.now();
+        for(var i = 0; i < size; i++){
+          load(getUrl(css), 'css', check);
+          load(getUrl(js), 'js', check);
+        }
+      }
+      setTimeout(function(){
+        test1(function(){
+          test2(function(){
+            test3(function(){
+              test4()
+            });
+          });
+        });
+      }, 1000);
+    </script>
+  </body>
+</html>
