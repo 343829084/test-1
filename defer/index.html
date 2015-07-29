@@ -6,12 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <h3 id="title"></h3>
     <ul id="result"></ul>
     <script>
       var TIMEOUT = 2000;
       var css = 'defer.css';
       var js = 'defer.js';
-      var size = 1;
+      var options = {
+        css: 'defer.css',
+        js: 'defer.js',
+        size: 10,
+        type: '',
+        test: 0
+      };
+      location.search.substring(1).split('&').forEach(function(param){
+        param = param.split('=');
+        options[param[0]] = param[1];
+      });
+      var size = options.size;
       var index = Date.now();
       var head = document.head || document.getElementsByTagName('head')[0];
       var result = document.getElementById('result');
@@ -49,6 +61,9 @@
         if (isScript) {
             node.type = 'text/javascript';
             node.src = url;
+            if(options.type){
+              node[options.type] = options.type;
+            }
         } else {
             if (isCss) {
                 node.type = 'text/css';
@@ -149,15 +164,10 @@
           load(getUrl(js), 'js', check);
         }
       }
-      setTimeout(function(){
-        test1(function(){
-          test2(function(){
-            test3(function(){
-              test4()
-            });
-          });
-        });
-      }, 1000);
+      var title = options.type ? options.type : '正常';
+      document.getElementById('title').innerText = title + ' 加载 ' + options.size + ' 个资源测试';
+      var fn = [test1, test2, test3, test4][options.test || 0];
+      setTimeout(fn, 1000);
     </script>
   </body>
 </html>
