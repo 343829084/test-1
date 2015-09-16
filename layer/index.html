@@ -36,6 +36,9 @@
             /*position: relative;
             z-index: 1;*/
         }
+        h1 {
+            font-size: 20px;
+        }
         a {
             color: #888;
             text-decoration: none;
@@ -49,18 +52,17 @@
         }
         li {
             position: relative;
-            height: 50px;
+            height: 30px;
             overflow: hidden;
-            border-bottom: 1px solid #ccc;
-            padding: 5px 20px 5px 65px;
-            margin-bottom: 5px;
+            border-top: 1px dotted #ccc;
+            padding: 5px 20px 5px 40px;
             font-size: 20px;
         }
         img {
-            width: 50px;
-            height: 50px;
+            width: 30px;
+            height: 30px;
             position: absolute;
-            left: 5px;
+            left: 2px;
             top: 5px;
             border: 1px solid #ccc;
         }
@@ -72,7 +74,12 @@
             color: #999;
         }
         label {
-            margin-left: 10px;
+            display: block;
+            margin: 10px 5px;
+            color: red;
+        }
+        input {
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -124,7 +131,7 @@
                 '</li>'
             ].join('');
         };
-        var size = parseInt(query.size) || 600;
+        var size = parseInt(query.size) || 1000;
         var html = '';
         for(var i = 0; i < size; i++){
             html += template(i);
