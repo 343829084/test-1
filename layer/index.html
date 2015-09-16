@@ -5,13 +5,38 @@
     <title>hello world</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <style type="text/css">
+        body {
+            font-family: 'Helvetica Neue', 'Microsoft Yahei', sans-serif;
+        }
         @-webkit-keyframes move {
               0% { -webkit-transform:translateX(0px) }
              50% { -webkit-transform:translateX(10px) }
             100% { -webkit-transform:translateX(0px) }
         }
+        @-moz-keyframes move {
+              0% { -moz-transform:translateX(0px) }
+             50% { -moz-transform:translateX(10px) }
+            100% { -moz-transform:translateX(0px) }
+        }
+        @-o-keyframes move {
+              0% { -o-transform:translateX(0px) }
+             50% { -o-transform:translateX(10px) }
+            100% { -o-transform:translateX(0px) }
+        }
+        @keyframes move {
+              0% { transform:translateX(0px) }
+             50% { transform:translateX(10px) }
+            100% { transform:translateX(0px) }
+        }
         span {
             -webkit-animation: move 1s linear infinite;
+            -moz-animation: move 1s linear infinite;
+            -o-animation: move 1s linear infinite;
+            animation: move 1s linear infinite;
+            display: inline-block;
+            border: 1px solid #f99;
+            padding: 0 5px;
+            border-radius: 3px;
             /*position: relative;
             z-index: 1;*/
         }
@@ -58,7 +83,7 @@
 <body>
     <h1>请使用具备『硬件加速』功能的『安卓』手机测试此页面</h1>
     <div>
-        <span id="title">hello world</span>
+        <span id="title">animation</span>
         <label>
             <input type="checkbox" onchange="setZIndex(this)"> 为动画元素设置z-index
         </label>
