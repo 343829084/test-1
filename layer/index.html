@@ -28,15 +28,11 @@
              50% { transform:translateX(10px) }
             100% { transform:translateX(0px) }
         }
-        span {
+        #title {
             -webkit-animation: move 1s linear infinite;
             -moz-animation: move 1s linear infinite;
             -o-animation: move 1s linear infinite;
             animation: move 1s linear infinite;
-            display: inline-block;
-            border: 1px solid #f99;
-            padding: 0 5px;
-            border-radius: 3px;
             /*position: relative;
             z-index: 1;*/
         }
@@ -81,9 +77,8 @@
     </style>
 </head>
 <body>
-    <h1>请使用具备『硬件加速』功能的『安卓』手机测试此页面</h1>
     <div>
-        <span id="title">animation</span>
+        <h1 id="title">请使用具备『硬件加速』功能的『安卓』手机测试此页面</h1>
         <label>
             <input type="checkbox" onchange="setZIndex(this)"> 为动画元素设置z-index
         </label>
