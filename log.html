@@ -8,6 +8,9 @@
     <body>
         <script>
         (function(){
+            window.onerror = function(msg){
+                alert(msg);
+            };
           var on = (function(){
             var prefix = "", _addEventListener;
             if ( window.addEventListener ) {
