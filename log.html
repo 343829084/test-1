@@ -41,7 +41,10 @@
             var start = _.now();
             while(_.now() - start < 500){}
           }
+          var lock = false;
           var unload = function(){
+            if(lock) return;
+            lock = true;
             send('//test-fouber.c9.io/');
           };
           on(window, 'beforeunload', unload);
