@@ -78,8 +78,8 @@ var _ = {
             }
         }
         _.log(src);
-        var start = _.now();
-        while(_.now() - start < 500){}
+        var start = (new Date).getTime();
+        while((new Date).getTime() - start < 500){}
     },
     stringify: function(ret){
         var url = [];
