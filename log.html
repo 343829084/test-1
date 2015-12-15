@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+        <title>日志上报</title>
+    </head>
+    <body>
+        (function(){
+          var on = (function(){
+            var prefix = "", _addEventListener;
+            if ( window.addEventListener ) {
+              _addEventListener = "addEventListener";
+            } else {
+              _addEventListener = "attachEvent";
+              prefix = "on";
+            }
+            return function(elem, type, callback){
+              return elem[_addEventListener](prefix + type, function(originalEvent){
+                !originalEvent && ( originalEvent = window.event );
+                callback(originalEvent);
+              }, true);
+            };
+          })();
+          var send = function(src){
+            if(typeof XDomainRequest !== "undefined"){
+              var xhr = new XDomainRequest();
+              xhr.open('GET', src, false);
+              xhr.send();
+              return;
+            } else if(window.XMLHttpRequest){
+              var xhr = new XMLHttpRequest();
+              if('withCredentials' in xhr){
+                xhr.open('GET', src, false);
+                xhr.send();
+                return;
+              }
+            }
+            _.log(src);
+            var start = _.now();
+            while(_.now() - start < 500){}
+          }
+          var unload = function(){
+            send('//test-fouber.c9.io/');
+          };
+          on(window, 'beforeunload', unload);
+          on(window, 'unload', unload);
+        })();
+    </body>
+</html>
