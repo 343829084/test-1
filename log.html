@@ -7,52 +7,159 @@
     </head>
     <body>
         <script>
-        (function(){
-            window.onerror = function(msg){
-                alert(msg);
-            };
-          var on = (function(){
-            var prefix = "", _addEventListener;
-            if ( window.addEventListener ) {
-              _addEventListener = "addEventListener";
-            } else {
-              _addEventListener = "attachEvent";
-              prefix = "on";
-            }
-            return function(elem, type, callback){
-              return elem[_addEventListener](prefix + type, function(originalEvent){
+        // util
+var _ = {
+    LOG_BLOCK_TIME: 300,
+    LOG_API: '"//fouber.github.io/test/?slotid=' + SLOT_ID,
+    UUID: (new Date).getTime().toString(36) + '' + Math.random().toString(32),
+    // LOG_API: '/?slotid=1010266&action=wtf',
+    now: function(){
+        return Math.round((new Date).getTime() / 1000);
+    },
+    on: (function(){
+        var prefix = "", _addEventListener;
+        if ( window.addEventListener ) {
+            _addEventListener = "addEventListener";
+        } else {
+            _addEventListener = "attachEvent";
+            prefix = "on";
+        }
+        return function(elem, type, callback){
+            return elem[_addEventListener](prefix + type, function(originalEvent){
                 !originalEvent && ( originalEvent = window.event );
                 callback(originalEvent);
-              }, true);
-            };
-          })();
-          var send = function(src){
-            if(typeof XDomainRequest !== "undefined"){
-              var xhr = new XDomainRequest();
-              xhr.open('GET', src, false);
-              xhr.send();
-              return;
-            } else if(window.XMLHttpRequest){
-              var xhr = new XMLHttpRequest();
-              if('withCredentials' in xhr){
+            }, true);
+        };
+    })(),
+    source: function(){
+        var source = '';
+        document.cookie.replace(/\bFTAPI_Source=([^;]+)/, function(m, $1){
+            source = $1
+        });
+        return source;
+    },
+    onWheel: function(elem, callback){
+        var type = "onwheel" in document.createElement("div") ? "wheel" : // Modern browsers support "wheel"
+                      document.onmousewheel !== undefined ? "mousewheel" : // Webkit and IE support at least "mousewheel"
+                      "DOMMouseScroll"; // let's assume that remaining browsers are older Firefox
+        _.on(elem, type, callback);
+        if(type === 'DOMMouseScroll'){
+            _.on(elem, 'MozMousePixelScroll', callback);
+        }
+    },
+    log: (function(){
+        var list = [];
+        return function(src){
+            var index = list.push(new Image) - 1;
+            list[index].src = src;
+        };
+    })(),
+    send: function(src){
+        if(typeof XDomainRequest !== "undefined"){
+            var xhr = new XDomainRequest();
+            xhr.open('GET', src, false);
+            xhr.send();
+            return;
+        } else if(window.XMLHttpRequest){
+            var xhr = new XMLHttpRequest();
+            if('withCredentials' in xhr){
                 xhr.open('GET', src, false);
                 xhr.send();
                 return;
-              }
             }
-            _.log(src);
-            var start = _.now();
-            while(_.now() - start < 500){}
-          }
-          var lock = false;
-          var unload = function(){
-            if(lock) return;
-            lock = true;
-            send('//test-fouber.c9.io/');
-          };
-          on(window, 'beforeunload', unload);
-          on(window, 'unload', unload);
-        })();
+        }
+        _.log(src);
+        var start = _.now();
+        while(_.now() - start < 500){}
+    },
+    stringify: function(ret){
+        var url = [];
+        for(var key in ret){
+            if(ret.hasOwnProperty(key)){
+                url.push(key + '=' + encodeURIComponent(ret[key]));
+            }
+        }
+        return url.join('&');
+    },
+    genUrl: function(ret){
+        var url = '';
+        for(var key in ret){
+            if(ret.hasOwnProperty(key)){
+                url += '&' + key + '=' + encodeURIComponent(ret[key]);
+            }
+        }
+        return _.LOG_API + url;
+    }
+};
+
+_.START = _.now();
+
+// collect
+var ret = {
+    ui: _.UUID,
+    em: 0,   // mouse events
+    ek: 0,   // keyboard events
+    es: 0   // scroll events
+};
+var map = {
+    'mouse': 'em',
+    'key': 'ek',
+    'scroll': 'es',
+    'wheel': 'es',
+    'mousewheel': 'es'
+};
+var collect = function (e) {
+    if(e.isTrusted !== false){
+        // var type = e.type;
+        e.type.replace(/mouse(wheel)?|wheel|key|scroll/i, function(m){
+            var key = map[m];
+            ret[key]++;
+        });
+    }
+};
+var events = [ 'mousemove', 'scroll', 'mousedown', 'mouseup', 'keydown', 'keyup' ];
+var root = document.documentElement;
+for(var i = 0, l = events.length; i < l; i++){
+    _.on(root, events[i], collect);
+}
+_.onWheel(root, collect);
+_.on(window, 'scroll', collect);
+
+// upload
+var addParams = function(ret){
+    ret.ea = ret.em + ret.ek + ret.es;
+    ret.dr = document.referrer;
+    ret.st = _.now() - _.START;
+    ret.vt = getVideoTime();
+    ret.lh = location.href;
+    ret.sc = _.source();
+    return ret;
+};
+var unloaded = false;
+var unload = function(){
+    if(unloaded) return;
+    unloaded = true;
+    addParams(ret);
+    var r = {
+        action: 'anti_spam',
+        p1: ret.ea,
+        p2: ret.st,
+        p3: _.stringify(ret)
+    };
+    var url = _.genUrl(r);
+    _.send(url);
+};
+_.on(window, 'beforeunload', unload);
+_.on(window, 'unload', unload);
+
+_.log(_.genUrl({
+    action: 'anti_spam_pv',
+    p1: 0,
+    p2: 0,
+    p3: _.stringify({
+        ui: _.UUID
+    })
+}));
         </script>
     </body>
 </html>
