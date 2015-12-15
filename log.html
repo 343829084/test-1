@@ -97,7 +97,6 @@ var _ = {
                 url += '&' + key + '=' + encodeURIComponent(ret[key]);
             }
         }
-        url += '&_r=' + Math.random().toString(32);
         return _.LOG_API + url;
     }
 };
