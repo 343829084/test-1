@@ -7,6 +7,15 @@
     </head>
     <body>
         <script>
+        var SLOT_ID = '1010266';
+    var getVideoTime = function(){
+        var App = window.App;
+        if(App && App.VideoInfo && App.VideoInfo.time){
+            return App.VideoInfo.time;
+        } else {
+            return -1;
+        }
+    };
         // util
 var _ = {
     LOG_BLOCK_TIME: 300,
